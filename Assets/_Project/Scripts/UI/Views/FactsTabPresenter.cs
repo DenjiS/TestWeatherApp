@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using Zenject;
 using Cysharp.Threading.Tasks;
+using UnityEngine.UI;
 
 public class FactsTabPresenter : MonoBehaviour
 {
@@ -10,11 +11,20 @@ public class FactsTabPresenter : MonoBehaviour
     [Inject] private readonly IFactsService _factsService;
 
     [SerializeField] private FactView _factTemplate;
-    [SerializeField] private PopupView _popupTemplate;
+    [SerializeField] private PopupPresenter _popupPanel;
     [SerializeField] private Transform _factsContainer;
 
-    private void OnEnable() =>
-        _requestQueue.AddRequest(UpdateFacts);
+    private void Awake()
+    {
+        _popupPanel.CloseButtonClicked.AddListener(() => _factsContainer.gameObject.SetActive(true));
+    }
+
+    private void OnEnable()
+    {
+        _requestQueue.CancelCurrentRequest();
+        _requestQueue.AddRequest(async (cancellationToken) =>
+            await UpdateFacts().AttachExternalCancellation(cancellationToken));
+    }
 
     private async UniTask UpdateFacts()
     {
@@ -29,7 +39,15 @@ public class FactsTabPresenter : MonoBehaviour
             {
                 FactView factView = Instantiate(_factTemplate, _factsContainer);
                 factView.Text.text = $"{factData.Id} - {factData.Name}";
-                factView.Button.onClick.AddListener(() => OnFactClicked(factData.WebId));
+
+                factView.Button.onClick.AddListener(() =>
+                {
+                    _requestQueue.CancelCurrentRequest();
+                    _requestQueue.AddRequest(async (cancellationToken) =>
+                        await OnFactClicked(factData.WebId, factView.LoadingIcon).AttachExternalCancellation(cancellationToken));
+
+                    _factsContainer.gameObject.SetActive(false);
+                });
             }
         }
         catch (Exception ex)
@@ -38,23 +56,28 @@ public class FactsTabPresenter : MonoBehaviour
         }
     }
 
-    private async void OnFactClicked(string factId)
+    private async UniTask OnFactClicked(string factId, Image loadingIcon)
     {
         try
         {
+            loadingIcon.gameObject.SetActive(true);
             FactDetailData detail = await _factsService.FetchFactDetailAsync(factId);
-            Debug.Log($"Fact: {detail.Name}, Description: {detail.Description}");
+
             ShowPopup(detail);
         }
         catch (Exception ex)
         {
             Debug.LogError($"Failed to fetch fact details: {ex.Message}");
         }
+        finally
+        {
+            loadingIcon.gameObject.SetActive(false);
+        }
     }
 
     private void ShowPopup(FactDetailData detail)
     {
-        PopupView popup = Instantiate(_popupTemplate, transform);
-        popup.Setup(detail.Name, detail.Description);
+        _popupPanel.gameObject.SetActive(true);
+        _popupPanel.Setup(detail.Name, detail.Description);
     }
 }

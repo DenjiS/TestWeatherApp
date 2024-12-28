@@ -16,7 +16,10 @@ public class WeatherTabPresenter : MonoBehaviour
 
     private void OnEnable()
     {
-        _requestQueue.AddRequest(UpdateWeather);
+        _requestQueue.CancelCurrentRequest();
+        _requestQueue.AddRequest(async (cancellationToken) =>
+            await UpdateWeather().AttachExternalCancellation(cancellationToken));
+
         _weatherUpdateManager.StartUpdating();
     }
 

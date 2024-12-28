@@ -2,15 +2,16 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using System.Threading;
 
 public class RequestQueue : IRequestQueue
 {
-    private readonly Queue<Func<UniTask>> _requestQueue = new();
+    private readonly Queue<Func<CancellationToken, UniTask>> _requestQueue = new();
 
-    private Func<UniTask> _currentRequest;
+    private CancellationTokenSource _currentTokenSource;
     private bool _isProcessing;
 
-    public void AddRequest(Func<UniTask> requestFunc)
+    public void AddRequest(Func<CancellationToken, UniTask> requestFunc)
     {
         _requestQueue.Enqueue(requestFunc);
 
@@ -18,8 +19,11 @@ public class RequestQueue : IRequestQueue
             ProcessQueue().Forget();
     }
 
-    public void CancelCurrentRequest() =>
-        _currentRequest = null;
+    public void CancelCurrentRequest()
+    {
+        _currentTokenSource?.Cancel();
+        _currentTokenSource = null;
+    }
 
     private async UniTaskVoid ProcessQueue()
     {
@@ -27,19 +31,27 @@ public class RequestQueue : IRequestQueue
 
         while (_requestQueue.Count > 0)
         {
-            _currentRequest = _requestQueue.Dequeue();
+            Func<CancellationToken, UniTask> requestFunc = _requestQueue.Dequeue();
+
+            _currentTokenSource = new CancellationTokenSource();
 
             try
             {
-                if (_currentRequest != null)
-                    await _currentRequest.Invoke();
+                if (requestFunc != null)
+                    await requestFunc.Invoke(_currentTokenSource.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("Request was canceled.");
             }
             catch (Exception ex)
             {
                 Debug.LogError($"Request failed: {ex.Message}");
             }
-
-            _currentRequest = null;
+            finally
+            {
+                _currentTokenSource = null;
+            }
         }
 
         _isProcessing = false;

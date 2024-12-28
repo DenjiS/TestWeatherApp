@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System;
 using UniRx;
 using Zenject;
@@ -19,7 +20,8 @@ public class WeatherUpdateManager : IWeatherUpdateManager
         Observable.Interval(TimeSpan.FromSeconds(UpdateIntervalSeconds))
             .Subscribe(_ =>
             {
-                _requestQueue.AddRequest(_weatherTabView.UpdateWeather);
+                _requestQueue.AddRequest(async (cancellationToken) => 
+                    await _weatherService.FetchWeatherAsync().AttachExternalCancellation(cancellationToken));
             })
             .AddTo(_disposables);
     }

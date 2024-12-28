@@ -23,8 +23,6 @@ public class FactsService : IFactsService
         if (request.result == UnityWebRequest.Result.Success)
         {
             string json = request.downloadHandler.text;
-            Debug.Log(json);
-
             FactsJsonData factsJsonData = JsonUtility.FromJson<FactsJsonData>(json);
             List<FactItem> factsItems = factsJsonData.data.Take(FactsAmount).ToList();
             _factsData = new List<FactData>();
