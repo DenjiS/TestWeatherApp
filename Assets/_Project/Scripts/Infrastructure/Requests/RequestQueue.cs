@@ -27,20 +27,18 @@ public class RequestQueue : IRequestQueue
 
         while (_requestQueue.Count > 0)
         {
-            IRequestCommand request = _requestQueue.Dequeue();
+            _currentRequest = _requestQueue.Dequeue();
 
             try
             {
-                await request.Execute();
-            }
-            catch (OperationCanceledException)
-            {
-                Debug.Log("Request was canceled.");
+                await _currentRequest.Execute();
             }
             catch (Exception exception)
             {
-                Debug.LogError($"Request failed: {exception.Message}");
+                Debug.LogWarning($"Request not completed: {exception.Message}");
             }
+
+            _currentRequest = null;
         }
 
         _isProcessing = false;

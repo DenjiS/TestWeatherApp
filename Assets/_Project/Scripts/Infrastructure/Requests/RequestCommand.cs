@@ -23,9 +23,12 @@ public class RequestCommand<T> : IRequestCommand
 #endif
         try
         {
-            T requestData;
-            requestData = await _onRequest.Invoke().AttachExternalCancellation(_cancellationToken.Token);
+            T requestData = await _onRequest.Invoke().AttachExternalCancellation(_cancellationToken.Token);
             _onComplete.Invoke(requestData);
+        }
+        catch (OperationCanceledException)
+        {
+            Debug.Log("Request was canceled.");
         }
         catch (Exception exception)
         {
