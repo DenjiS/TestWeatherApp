@@ -24,7 +24,7 @@ public class FactAttributes
 
 public struct FactData
 {
-    public int Id;
+    public int Number;
     public string WebId;
     public string Name;
 }

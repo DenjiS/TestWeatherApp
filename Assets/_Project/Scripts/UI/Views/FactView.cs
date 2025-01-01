@@ -10,13 +10,8 @@ public class FactView : MonoBehaviour
     [field: SerializeField] public Button Button { get; private set; }
     [field: SerializeField] public Image LoadingIcon { get; private set; }
 
-    public Transform Transform { get; private set; }
-
-    private void Awake() =>
-        Transform = transform;
-
     public void Setup(FactData data) =>
-        _text.text = $"{data.Id} - {data.Name}";
+        _text.text = $"{data.Number} - {data.Name}";
 
     public class Pool : MonoMemoryPool<FactData, FactView>
     {

@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -213,9 +212,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 589e6930e4ccf164094295d3c82ce674, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _factTemplate: {fileID: 7423402345414608850, guid: fa2f1e1846f280147bebea5c834327cd, type: 3}
+  _factsContainer: {fileID: 965780395}
   _popupPanel: {fileID: 1269194563}
-  _factsContainer: {fileID: 965780396}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -968,6 +966,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0f972699a826164a89f7ff4c845c7a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _factView: {fileID: 7423402345414608850, guid: fa2f1e1846f280147bebea5c834327cd, type: 3}
+  _factsContainer: {fileID: 965780396}
+  _factViewsPoolSize: 10
 --- !u!4 &1734689287
 Transform:
   m_ObjectHideFlags: 0

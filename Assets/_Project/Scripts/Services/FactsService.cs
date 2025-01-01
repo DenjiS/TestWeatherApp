@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -13,9 +12,7 @@ public class FactsService : IFactsService
 
     [Inject] private readonly IRequestQueue _requestQueue;
 
-    private List<FactData> _factsData;
-
-    public async UniTask<List<FactData>> FetchFactsAsync()
+    public async UniTask<FactData[]> FetchFactsAsync()
     {
         using UnityWebRequest request = UnityWebRequest.Get(FactsApiUrl);
         await request.SendWebRequest();
@@ -24,13 +21,14 @@ public class FactsService : IFactsService
         {
             string json = request.downloadHandler.text;
             FactsJsonData factsJsonData = JsonUtility.FromJson<FactsJsonData>(json);
-            List<FactItem> factsItems = factsJsonData.data.Take(FactsAmount).ToList();
-            _factsData = new List<FactData>();
 
-            for (int i = 0; i < factsItems.Count; i++)
-                _factsData.Add(new FactData { Id = i + 1, WebId = factsItems[i].id, Name = factsItems[i].attributes.name });
+            FactItem[] factsItems = factsJsonData.data.Take(FactsAmount).ToArray();
+            FactData[] factsData = new FactData[factsItems.Count()];
 
-            return _factsData;
+            for (int i = 0; i < factsItems.Count(); i++)
+                factsData[i] = new FactData { Number = i + 1, WebId = factsItems[i].id, Name = factsItems[i].attributes.name };
+
+            return factsData;
         }
         else
         {

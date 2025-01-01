@@ -3,6 +3,6 @@ using System.Collections.Generic;
 
 public interface IFactsService
 {
-    UniTask<List<FactData>> FetchFactsAsync();
+    UniTask<FactData[]> FetchFactsAsync();
     UniTask<FactDetailData> FetchFactDetailAsync(string factId);
 }
