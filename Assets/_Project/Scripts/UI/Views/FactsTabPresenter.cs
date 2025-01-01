@@ -22,57 +22,50 @@ public class FactsTabPresenter : MonoBehaviour
     private void OnEnable()
     {
         _requestQueue.CancelCurrentRequest();
-        _requestQueue.AddRequest(async (cancellationToken) =>
-            await UpdateFacts().AttachExternalCancellation(cancellationToken));
+        _requestQueue.AddRequest(new RequestCommand<List<FactData>>(_factsService.FetchFactsAsync, UpdateFacts));
     }
 
-    private async UniTask UpdateFacts()
+    private void UpdateFacts(List<FactData> facts)
     {
         foreach (Transform child in _factsContainer)
             Destroy(child.gameObject);
 
-        try
+        foreach (FactData factData in facts)
         {
-            List<FactData> facts = await _factsService.FetchFactsAsync();
+            FactView factView = Instantiate(_factTemplate, _factsContainer);
+            factView.Text.text = $"{factData.Id} - {factData.Name}";
 
-            foreach (FactData factData in facts)
+            factView.Button.onClick.AddListener(() =>
             {
-                FactView factView = Instantiate(_factTemplate, _factsContainer);
-                factView.Text.text = $"{factData.Id} - {factData.Name}";
+                _requestQueue.CancelCurrentRequest();
+                _requestQueue.AddRequest(new RequestCommand<FactDetailData>(() => OnFactClicked(factData.WebId, factView.LoadingIcon), ShowPopup));
 
-                factView.Button.onClick.AddListener(() =>
-                {
-                    _requestQueue.CancelCurrentRequest();
-                    _requestQueue.AddRequest(async (cancellationToken) =>
-                        await OnFactClicked(factData.WebId, factView.LoadingIcon).AttachExternalCancellation(cancellationToken));
+                _factsContainer.gameObject.SetActive(false);
+            });
+        }
 
-                    _factsContainer.gameObject.SetActive(false);
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Failed to update facts: {ex.Message}");
-        }
     }
 
-    private async UniTask OnFactClicked(string factId, Image loadingIcon)
+    private async UniTask<FactDetailData> OnFactClicked(string factId, Image loadingIcon)
     {
+        FactDetailData detail;
+
         try
         {
             loadingIcon.gameObject.SetActive(true);
-            FactDetailData detail = await _factsService.FetchFactDetailAsync(factId);
-
-            ShowPopup(detail);
+            detail = await _factsService.FetchFactDetailAsync(factId);
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            Debug.LogError($"Failed to fetch fact details: {ex.Message}");
+            detail = default;
+            Debug.LogError($"Failed to fetch fact details: {exception.Message}");
         }
         finally
         {
             loadingIcon.gameObject.SetActive(false);
         }
+
+        return detail;
     }
 
     private void ShowPopup(FactDetailData detail)

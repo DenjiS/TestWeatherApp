@@ -1,5 +1,3 @@
-using Cysharp.Threading.Tasks;
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,8 +15,7 @@ public class WeatherTabPresenter : MonoBehaviour
     private void OnEnable()
     {
         _requestQueue.CancelCurrentRequest();
-        _requestQueue.AddRequest(async (cancellationToken) =>
-            await UpdateWeather().AttachExternalCancellation(cancellationToken));
+        _requestQueue.AddRequest(new RequestCommand<WeatherData>(_weatherService.FetchWeatherAsync, UpdateWeather));
 
         _weatherUpdateManager.StartUpdating();
     }
@@ -26,17 +23,9 @@ public class WeatherTabPresenter : MonoBehaviour
     private void OnDisable() =>
         _weatherUpdateManager.StopUpdating();
 
-    public async UniTask UpdateWeather()
+    public void UpdateWeather(WeatherData data)
     {
-        try
-        {
-            WeatherData data = await _weatherService.FetchWeatherAsync();
-            _weatherText.text = $"Today - {data.Temperature}F";
-            _weatherIcon.texture = data.Icon;
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Failed to update weather: {ex.Message}");
-        }
+        _weatherText.text = $"Today - {data.Temperature}F";
+        _weatherIcon.texture = data.Icon;
     }
 }

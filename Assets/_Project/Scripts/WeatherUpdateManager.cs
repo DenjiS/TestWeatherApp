@@ -18,11 +18,7 @@ public class WeatherUpdateManager : IWeatherUpdateManager
         StopUpdating();
 
         Observable.Interval(TimeSpan.FromSeconds(UpdateIntervalSeconds))
-            .Subscribe(_ =>
-            {
-                _requestQueue.AddRequest(async (cancellationToken) => 
-                    await _weatherService.FetchWeatherAsync().AttachExternalCancellation(cancellationToken));
-            })
+            .Subscribe(_ => _requestQueue.AddRequest(new RequestCommand<WeatherData>(_weatherService.FetchWeatherAsync, _weatherTabView.UpdateWeather)))
             .AddTo(_disposables);
     }
 
