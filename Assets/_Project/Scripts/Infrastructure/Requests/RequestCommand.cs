@@ -25,6 +25,7 @@ public class RequestCommand<T> : IRequestCommand
 #if ENABLE_REQUEST_DELAY_TEST
             await UniTask.Delay(TimeSpan.FromSeconds(1d));
 #endif
+
             _onComplete.Invoke(requestData);
         }
         catch (OperationCanceledException)

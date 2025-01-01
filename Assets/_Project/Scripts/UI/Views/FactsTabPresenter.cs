@@ -9,8 +9,8 @@ public class FactsTabPresenter : MonoBehaviour
 {
     [Inject] private readonly IRequestQueue _requestQueue;
     [Inject] private readonly IFactsService _factsService;
+    [Inject] private readonly FactView.Pool _factViewsPool;
 
-    [SerializeField] private FactView _factTemplate;
     [SerializeField] private PopupView _popupPanel;
     [SerializeField] private Transform _factsContainer;
 
@@ -27,13 +27,13 @@ public class FactsTabPresenter : MonoBehaviour
 
     private void UpdateFacts(List<FactData> facts)
     {
-        foreach (Transform child in _factsContainer)
-            Destroy(child.gameObject);
+        foreach (FactView view in _factsContainer.GetComponentsInChildren<FactView>())
+            _factViewsPool.Despawn(view);
 
         foreach (FactData factData in facts)
         {
-            FactView factView = Instantiate(_factTemplate, _factsContainer);
-            factView.Text.text = $"{factData.Id} - {factData.Name}";
+            FactView factView = _factViewsPool.Spawn(factData);
+            factView.Transform.SetParent(_factsContainer);
 
             factView.Button.onClick.AddListener(() =>
             {
