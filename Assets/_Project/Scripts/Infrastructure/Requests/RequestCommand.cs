@@ -18,12 +18,13 @@ public class RequestCommand<T> : IRequestCommand
 
     public async UniTask Execute()
     {
-#if ENABLE_REQUEST_DELAY_TEST
-        await UniTask.Delay(TimeSpan.FromSeconds(1d));
-#endif
         try
         {
             T requestData = await _onRequest.Invoke().AttachExternalCancellation(_cancellationToken.Token);
+
+#if ENABLE_REQUEST_DELAY_TEST
+            await UniTask.Delay(TimeSpan.FromSeconds(1d));
+#endif
             _onComplete.Invoke(requestData);
         }
         catch (OperationCanceledException)

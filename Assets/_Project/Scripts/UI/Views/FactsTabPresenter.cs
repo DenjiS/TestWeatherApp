@@ -11,16 +11,16 @@ public class FactsTabPresenter : MonoBehaviour
     [Inject] private readonly IFactsService _factsService;
 
     [SerializeField] private FactView _factTemplate;
-    [SerializeField] private PopupPresenter _popupPanel;
+    [SerializeField] private PopupView _popupPanel;
     [SerializeField] private Transform _factsContainer;
 
-    private void Awake()
-    {
-        _popupPanel.CloseButtonClicked.AddListener(() => _factsContainer.gameObject.SetActive(true));
-    }
+    private void Awake() =>
+        _popupPanel.CloseButton.onClick.AddListener(() => SwitchPopupPanel(false));
 
     private void OnEnable()
     {
+        SwitchPopupPanel(false);
+
         _requestQueue.CancelCurrentRequest();
         _requestQueue.AddRequest(new RequestCommand<List<FactData>>(_factsService.FetchFactsAsync, UpdateFacts));
     }
@@ -39,11 +39,8 @@ public class FactsTabPresenter : MonoBehaviour
             {
                 _requestQueue.CancelCurrentRequest();
                 _requestQueue.AddRequest(new RequestCommand<FactDetailData>(() => OnFactClicked(factData.WebId, factView.LoadingIcon), ShowPopup));
-
-                _factsContainer.gameObject.SetActive(false);
             });
         }
-
     }
 
     private async UniTask<FactDetailData> OnFactClicked(string factId, Image loadingIcon)
@@ -70,7 +67,14 @@ public class FactsTabPresenter : MonoBehaviour
 
     private void ShowPopup(FactDetailData detail)
     {
-        _popupPanel.gameObject.SetActive(true);
+        SwitchPopupPanel(true);
         _popupPanel.Setup(detail.Name, detail.Description);
+    }
+
+    private void SwitchPopupPanel(bool isPopupActive)
+    {
+        _factsContainer.gameObject.SetActive(!isPopupActive);
+        _popupPanel.gameObject.SetActive(isPopupActive);
+
     }
 }

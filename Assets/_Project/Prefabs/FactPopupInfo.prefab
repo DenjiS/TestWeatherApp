@@ -227,9 +227,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b96514b9daa924280dcdf4dae66466, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  titleText: {fileID: 8654538058939188897}
-  descriptionText: {fileID: 2774047229249563082}
-  closeButton: {fileID: 4287795419886892709}
+  _titleText: {fileID: 8654538058939188897}
+  _descriptionText: {fileID: 2774047229249563082}
+  <CloseButton>k__BackingField: {fileID: 4287795419886892709}
 --- !u!114 &1171651035068355203
 MonoBehaviour:
   m_ObjectHideFlags: 0
