@@ -3,14 +3,11 @@ using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
-using Zenject;
 
 public class FactsService : IFactsService
 {
     private const string FactsApiUrl = "https://dogapi.dog/api/v2/breeds";
     private const int FactsAmount = 10;
-
-    [Inject] private readonly IRequestQueue _requestQueue;
 
     public async UniTask<FactData[]> FetchFactsAsync()
     {

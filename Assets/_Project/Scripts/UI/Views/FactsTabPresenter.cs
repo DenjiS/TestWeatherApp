@@ -14,7 +14,7 @@ public class FactsTabPresenter : MonoBehaviour
 
     private readonly List<FactView> _activeViews = new();
 
-    [SerializeField] private GameObject _factsContainer;
+    [SerializeField] private Transform _factsContainer;
     [SerializeField] private PopupView _popupPanel;
 
     private void Awake() =>
@@ -37,7 +37,7 @@ public class FactsTabPresenter : MonoBehaviour
 
         foreach (FactData factData in facts)
         {
-            FactView factView = _factViewsPool.Spawn(factData);
+            FactView factView = _factViewsPool.Spawn(factData, _factsContainer);
 
             factView.Button.onClick.AddListener(() =>
             {
@@ -88,7 +88,7 @@ public class FactsTabPresenter : MonoBehaviour
 
     private void SwitchPopupPanel(bool isPopupActive)
     {
-        _factsContainer.SetActive(!isPopupActive);
+        _factsContainer.gameObject.SetActive(!isPopupActive);
         _popupPanel.gameObject.SetActive(isPopupActive);
     }
 }

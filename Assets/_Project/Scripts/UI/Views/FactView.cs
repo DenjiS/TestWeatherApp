@@ -7,15 +7,23 @@ public class FactView : MonoBehaviour
 {
     [SerializeField] private TMP_Text _text;
 
+    private Transform _transform;
+
     [field: SerializeField] public Button Button { get; private set; }
     [field: SerializeField] public Image LoadingIcon { get; private set; }
 
-    public void Setup(FactData data) =>
-        _text.text = $"{data.Number} - {data.Name}";
+    private void Awake() => 
+        _transform = transform;
 
-    public class Pool : MonoMemoryPool<FactData, FactView>
+    public void Setup(FactData data, Transform rootPanel)
     {
-        protected override void Reinitialize(FactData data, FactView item) =>
-            item.Setup(data);
+        _text.text = $"{data.Number} - {data.Name}";
+        _transform.parent = rootPanel;
+    }
+
+    public class Pool : MonoMemoryPool<FactData, Transform, FactView>
+    {
+        protected override void Reinitialize(FactData data, Transform rootPanel, FactView item) => 
+            item.Setup(data, rootPanel);
     }
 }

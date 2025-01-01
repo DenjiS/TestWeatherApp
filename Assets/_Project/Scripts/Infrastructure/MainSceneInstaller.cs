@@ -5,7 +5,6 @@ public class MainSceneInstaller : MonoInstaller
 {
     [Header("Facts presenter")]
     [SerializeField] private FactView _factView;
-    [SerializeField] private Transform _factsContainer;
     [SerializeField] private int _factViewsPoolSize = 10;
 
     public override void InstallBindings()
@@ -20,6 +19,6 @@ public class MainSceneInstaller : MonoInstaller
         Container.BindMemoryPool<FactView, FactView.Pool>()
             .WithInitialSize(_factViewsPoolSize)
             .FromComponentInNewPrefab(_factView)
-            .UnderTransform(_factsContainer);
+            .UnderTransform(transform);
     }
 }
