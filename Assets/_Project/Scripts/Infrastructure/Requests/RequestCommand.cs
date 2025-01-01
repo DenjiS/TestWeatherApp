@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
+using UniRx;
 using UnityEngine;
 
 public class RequestCommand<T> : IRequestCommand
@@ -20,13 +21,13 @@ public class RequestCommand<T> : IRequestCommand
     {
         try
         {
-            T requestData = await _onRequest.Invoke().AttachExternalCancellation(_cancellationToken.Token);
-
+            await _onRequest.Invoke()
+                .AttachExternalCancellation(_cancellationToken.Token)
+                .ToObservable()
 #if ENABLE_REQUEST_DELAY_TEST
-            await UniTask.Delay(TimeSpan.FromSeconds(1d));
+                .DelaySubscription(TimeSpan.FromSeconds(1d))
 #endif
-
-            _onComplete.Invoke(requestData);
+                .Do(_onComplete);
         }
         catch (OperationCanceledException)
         {
