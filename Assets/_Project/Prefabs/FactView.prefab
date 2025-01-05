@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22a2152e216edec47bd3eb5131ee6cd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <Text>k__BackingField: {fileID: 6026316790712830047}
+  _text: {fileID: 6026316790712830047}
   <Button>k__BackingField: {fileID: 4272927083955992302}
   <LoadingIcon>k__BackingField: {fileID: 4301601495718613568}
 --- !u!1 &8491391280986422649
